@@ -17,7 +17,12 @@ jobs:
         with:
           fetch-depth: 2
       - name: Check whitespace
-        run: git diff --check HEAD^ HEAD
+        run: |
+          if git rev-parse --verify -q HEAD^ >/dev/null; then
+            git diff --check HEAD^ HEAD
+          else
+            echo "No parent commit; skipping whitespace diff check"
+          fi
       - name: Check release scripts
         run: bash -n scripts/install.sh scripts/package.sh
       - name: Validate package

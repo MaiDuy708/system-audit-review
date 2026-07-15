@@ -40,7 +40,7 @@ install_codex() {
     printf 'Codex skill installer not found: %s\n' "${installer}" >&2
     exit 1
   fi
-  python3 "${installer}" --repo "${REPOSITORY}" --path . --ref "${REF}"
+  python3 "${installer}" --repo "${REPOSITORY}" --path . --ref "${REF}" --name "${SKILL}"
 }
 
 install_openclaw() {

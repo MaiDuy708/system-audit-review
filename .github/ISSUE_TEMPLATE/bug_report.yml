@@ -1,0 +1,37 @@
+name: Audit-quality defect
+description: Report a safety, coverage, evidence, or portability failure.
+title: "[defect]: "
+labels:
+  - defect
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, customer data, or live system identifiers.
+  - type: input
+    id: agent
+    attributes:
+      label: Agent and version
+      placeholder: Codex 0.x, Claude Code 2.x, OpenClaw 2026.x, or Gemini CLI 0.x
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: State the exact unsafe, incorrect, or missing behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: State the violated skill contract or expected guard.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal safe reproduction
+      description: Use a fixture or redacted sample. Do not target production.
+    validations:
+      required: true

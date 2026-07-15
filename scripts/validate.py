@@ -12,6 +12,14 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "SKILL.md"
 FORBIDDEN_NAMES = {".DS_Store"}
+REQUIRED_FILES = (
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "assets/evidence-flightpath.svg",
+    "scripts/install.sh",
+    "scripts/package.sh",
+)
 SECRET_PATTERNS = (
     re.compile(r"BEGIN [A-Z ]*PRIVATE KEY"),
     re.compile(r"AKIA[0-9A-Z]{16}"),
@@ -34,6 +42,10 @@ def frontmatter_value(text: str, key: str) -> str:
 
 
 def main() -> None:
+    for relative_path in REQUIRED_FILES:
+        if not (ROOT / relative_path).is_file():
+            fail(f"required publish artefact missing: {relative_path}")
+
     skill_text = SKILL.read_text(encoding="utf-8")
     name = frontmatter_value(skill_text, "name")
     description = frontmatter_value(skill_text, "description")

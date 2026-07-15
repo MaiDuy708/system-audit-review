@@ -18,5 +18,7 @@ jobs:
           fetch-depth: 2
       - name: Check whitespace
         run: git diff --check HEAD^ HEAD
+      - name: Check release scripts
+        run: bash -n scripts/install.sh scripts/package.sh
       - name: Validate package
         run: python3 scripts/validate.py

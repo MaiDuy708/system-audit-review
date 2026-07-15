@@ -7,91 +7,139 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-0b8f5b.svg" alt="MIT License"></a>
 </p>
 
-## The Standard
+<p align="center">
+  <img src="assets/evidence-flightpath.svg" alt="Evidence-led audit flow from scope to verified report" width="960">
+</p>
 
-Most reviews stop at a scan result or a plausible explanation. This skill requires a decision-grade audit: a measured asset census, direct evidence for every material claim, end-to-end side-effect traces, explicit negative-space checks, and a report that names what remains unreviewed.
+## Why This Exists
 
-It is designed for repositories, services, runtime workspaces, data pipelines, security boundaries, automations, and operational workflows, particularly when they are large, mixed, stateful, or risky.
+Large systems do not fail because an audit missed one obvious file. They fail at seams: a backup silently carries credentials, a scheduler writes to the wrong authority, a timeout is mistaken for a completed side effect, or a clean test suite hides an untraced production path.
+
+`system-audit-review` turns a vague request to “review everything” into an evidence contract. It forces the agent to classify the target, measure coverage, trace material writes end-to-end, falsify plausible alternatives, and state what it could not review.
+
+| Without this skill | With this skill |
+|---|---|
+| A short list of opinions | A claim-evidence ledger with confidence and resolving probes |
+| “The scan passed” | Census, coverage manifest, and negative-space checks |
+| HTTP 200 treated as success | Durable readback and explicit receipt states |
+| Causal stories inferred from similarity | Sparse failure matrix with proven edges only |
+| “Whole system reviewed” | Every blocked or unreviewed material layer named |
+
+## The Audit Flightpath
 
 ```mermaid
 flowchart LR
     A[Lock scope] --> B[Classify target]
-    B --> C[Build census and coverage manifest]
-    C --> D[Trace evidence and side effects]
+    B --> C[Measure census]
+    C --> D[Trace evidence]
     D --> E[Falsify alternatives]
     E --> F[Ledger-backed report]
     F --> G[Verifier pass]
 ```
 
-## What It Covers
+The protocol covers seven evidence layers: file census, change control, runtime/config drift, dependency and test surface, credentials, material side effects, and negative space.
 
-| Layer | Required evidence |
-|---|---|
-| File census | Footprint, file classes, executable files, symlinks, and outliers |
-| Change control | Repository state, history exposure, ignored-secret rules, and drift |
-| Runtime and config | Live processes, schedulers, source-of-truth config, and shadow copies |
-| Dependencies and tests | Manifests, vendors, static checks, and untested high-consequence paths |
-| Credentials | Permissions, tracked material, backup inclusion, and false positives |
-| Side effects | Trigger, validation, submit, durable commit, readback, recovery, and alerting |
-| Negative space | Stale artefacts, intended exclusions, child processes, and rejected hypotheses |
+## Install In One Command
 
-For a large target, the skill blocks a final report until every applicable layer is covered or explicitly marked blocked, unreviewed, or not applicable.
+Run the line for the agent you use. The installer changes only that agent's skill directory and prints its actions.
 
-## Output Contract
+### Claude Code
 
-A large-target report includes:
+```bash
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh | bash -s -- claude
+```
 
-- Target classification and asset census
-- Coverage manifest and checks run
-- Claim-evidence ledger with evidence labels
-- Findings ordered by severity and a sparse failure matrix
-- Write receipt states, rejected hypotheses, and open blockers
-- Testable remediation roadmap, chaos tests, and verifier outcome
+### Codex
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh | bash -s -- codex
+```
+
+### OpenClaw
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh | bash -s -- openclaw
+```
+
+### Gemini CLI
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh | bash -s -- gemini
+```
+
+For inspection before execution, download the script first:
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh
+less install.sh
+bash install.sh claude
+```
+
+The installer defaults to `main`. Pin an installed source when reproducibility matters:
+
+```bash
+SYSTEM_AUDIT_REVIEW_REF=v0.1.2 bash install.sh claude
+```
+
+## Release Package
+
+Every release includes a self-contained `.skill` archive for air-gapped transfer or Gemini CLI installation:
+
+```bash
+gemini skills install ./system-audit-review-<version>.skill --scope user
+```
+
+The archive is built from the tagged repository state, excludes `.git`, and is validated by Gemini CLI before upload. See [Releases](https://github.com/MaiDuy708/system-audit-review/releases).
+
+## What It Delivers
+
+For a large target, the final report must include:
+
+- Target classification, asset census, coverage manifest, and checks run
+- Claim-evidence ledger with direct references and evidence labels
+- Findings, sparse failure matrix, receipt states, and rejected hypotheses
+- Open blockers, unreviewed material, testable remediation, and verifier outcome
 
 An exit code, a log line, an HTTP acknowledgement, or a successful function call is never treated as business success without contract-required readback.
 
-## Install
-
-| Agent | Command |
-|---|---|
-| Codex | `python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py --repo MaiDuy708/system-audit-review --path .` |
-| OpenClaw | `openclaw skills install git:MaiDuy708/system-audit-review` |
-| Gemini CLI | `gemini skills install https://github.com/MaiDuy708/system-audit-review` |
-| Claude Code | `claude plugin marketplace add MaiDuy708/system-audit-review` then `claude plugin install system-audit-review@maiduy-system-audit-review` |
-
-Inspect third-party skills before installation. A skill can influence agent behavior and access local tools and files.
-
 ## Use It
 
-Invoke the skill when the request needs more than surface-level code commentary:
-
 ```text
-Audit this workspace read-only. It is 4 GB, contains source, runtime state,
+Audit this workspace read-only. It is 4 GB and contains source, runtime state,
 backups, credentials, and schedulers. Produce a forensic report with a coverage
 manifest and evidence ledger. Do not change anything.
 ```
 
-The skill defaults to read-only. It does not mutate the target, live runtime state, configuration, services, external systems, or credentials unless the user explicitly authorizes that exact mutation.
+The skill defaults to read-only. It does not mutate the target, runtime state, configuration, services, external systems, or credentials unless the user explicitly authorizes that exact mutation.
+
+## Agent Support
+
+| Agent | Native distribution surface | Verification in this repository |
+|---|---|---|
+| Codex | GitHub skill installer | `quick_validate.py` |
+| Claude Code | Plugin marketplace | `claude plugin validate` plus isolated install |
+| OpenClaw | Git/local skill install | Isolated managed-skill install and visibility check |
+| Gemini CLI | Git/local `.skill` archive | Isolated install and discovery check |
 
 ## Repository Layout
 
 ```text
 SKILL.md                         Agent-facing workflow and hard boundaries
 references/audit-protocol.md     Forensic checklist, receipt semantics, and gates
-agents/openai.yaml               Codex display metadata
-.claude-plugin/                  Claude Code plugin and marketplace metadata
+assets/evidence-flightpath.svg   Self-contained visual overview for the README
+scripts/install.sh               One-command installer for one selected agent
+scripts/package.sh               Reproducible .skill release archive builder
 scripts/validate.py              Dependency-free repository integrity checks
+.claude-plugin/                  Claude Code plugin and marketplace metadata
 .github/                         CI, dependency updates, ownership, and issue intake
 ```
 
 ## Release Policy
 
-Releases are tagged after the validator passes and the supported-agent installation paths are checked. `0.x` releases are production-usable but may refine workflow shape; `1.0.0` requires independent behavioral evaluation, not only structural validation.
+Releases are tagged only after structural validation, supported-agent installation checks, and package artifact validation. `0.x` releases are production-usable but may refine workflow shape; `1.0.0` requires independent behavioral evaluation, not only structural validation.
 
-## Contributing And Security
+## Contributing, Security, And Brand
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the evidence standard for changes and [SECURITY.md](SECURITY.md) for responsible disclosure. The project is licensed under [MIT](LICENSE).
-
-## Brand And Provenance
 
 **MAIDUY** is the publisher mark for maintained releases. It is an attribution and provenance signal, not a claim of registered trademark status. Modified distributions must use a distinct identity and state their relationship to this repository. Details: [BRAND.md](BRAND.md).

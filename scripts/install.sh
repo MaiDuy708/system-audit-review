@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPOSITORY="${SYSTEM_AUDIT_REVIEW_REPOSITORY:-MaiDuy708/system-audit-review}"
-REF="${SYSTEM_AUDIT_REVIEW_REF:-main}"
+REF="${SYSTEM_AUDIT_REVIEW_REF:-v0.1.2}"
 SKILL="system-audit-review"
 MARKETPLACE="maiduy-system-audit-review"
 
@@ -50,7 +50,12 @@ install_openclaw() {
 
 install_gemini() {
   need gemini
-  gemini skills install "https://github.com/${REPOSITORY}" --path . --scope user --consent
+  need curl
+  local archive
+  archive="$(mktemp "${TMPDIR:-/tmp}/system-audit-review.XXXXXX.skill")"
+  trap 'rm -f "${archive}"' RETURN
+  curl -fsSL "https://github.com/${REPOSITORY}/releases/download/${REF}/${SKILL}-${REF#v}.skill" -o "${archive}"
+  gemini skills install "${archive}" --scope user --consent
 }
 
 case "${1:-}" in

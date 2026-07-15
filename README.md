@@ -46,39 +46,39 @@ Run the line for the agent you use. The installer changes only that agent's skil
 ### Claude Code
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh | bash -s -- claude
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.2/scripts/install.sh | bash -s -- claude
 ```
 
 ### Codex
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh | bash -s -- codex
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.2/scripts/install.sh | bash -s -- codex
 ```
 
 ### OpenClaw
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh | bash -s -- openclaw
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.2/scripts/install.sh | bash -s -- openclaw
 ```
 
 ### Gemini CLI
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh | bash -s -- gemini
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.2/scripts/install.sh | bash -s -- gemini
 ```
 
 For inspection before execution, download the script first:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/MaiDuy708/system-audit-review/main/scripts/install.sh
+curl -fsSLO https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.2/scripts/install.sh
 less install.sh
 bash install.sh claude
 ```
 
-The installer defaults to `main`. Pin an installed source when reproducibility matters:
+The installer defaults to this release tag. Override the source ref when testing a newer branch or a fork:
 
 ```bash
-SYSTEM_AUDIT_REVIEW_REF=v0.1.2 bash install.sh claude
+SYSTEM_AUDIT_REVIEW_REF=main bash install.sh claude
 ```
 
 ## Release Package

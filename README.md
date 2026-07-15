@@ -39,43 +39,39 @@ flowchart LR
 
 The protocol covers seven evidence layers: file census, change control, runtime/config drift, dependency and test surface, credentials, material side effects, and negative space.
 
-## Install In One Command
+## Native Installation
 
-Run the line for the agent you use. Claude Code, Codex, and OpenClaw use their native plugin marketplaces; Gemini CLI uses its native agent-skill installer.
+Use the native command for your agent. No download wrapper is required.
 
 ### Claude Code
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh | bash -s -- claude
+claude plugin marketplace add MaiDuy708/system-audit-review@v0.1.5
+claude plugin install system-audit-review@maiduy-system-audit-review
 ```
 
 ### Codex
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh | bash -s -- codex
+codex plugin marketplace add MaiDuy708/system-audit-review --ref v0.1.5
+codex plugin add system-audit-review --marketplace maiduy-system-audit-review
 ```
 
 ### OpenClaw
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh | bash -s -- openclaw
+openclaw plugins install system-audit-review --marketplace https://github.com/MaiDuy708/system-audit-review.git --force
 ```
 
 ### Gemini CLI
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh | bash -s -- gemini
+gemini skills install https://github.com/MaiDuy708/system-audit-review.git --path . --scope user --consent
 ```
 
-For inspection before execution, download the script first:
+Claude Code and Codex use immutable `v0.1.5` marketplace refs. OpenClaw and Gemini CLI currently install from the repository default branch because their native plugin/skill commands accept no git ref flag.
 
-```bash
-curl -fsSLO https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh
-less install.sh
-bash install.sh claude
-```
-
-The Claude, Codex, and Gemini installers default to this release tag. Override the source ref when testing a newer branch or a fork. OpenClaw's plugin marketplace installer tracks the repository default branch because its current CLI accepts no marketplace ref.
+The optional [installer script](scripts/install.sh) remains for unattended automation and supports a custom source ref through `SYSTEM_AUDIT_REVIEW_REF`.
 
 ```bash
 SYSTEM_AUDIT_REVIEW_REF=main bash install.sh claude

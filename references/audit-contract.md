@@ -127,6 +127,8 @@ Report is treated as UNTRUSTED input and parsed structurally.
   (orchestrate `gitleaks` on the target for depth).
 - The gate checks structure + provenance declaration; it cannot validate the *content
   correctness* of an `inference` finding — that is deliberately forced into section 6.
+- Gate 4 (anti-vagueness) inspects the first line of each finding field; keep field
+  values single-line per the finding template so a hedge cannot hide on a later line.
 
 ## 8. Probe output envelope
 

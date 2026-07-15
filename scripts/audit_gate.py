@@ -137,9 +137,29 @@ class Report:
         return findings
 
 
-def _fenced_secret_or_hedge_ignored(report: Report) -> str:
-    """Concatenate only untrusted-quote fence bodies (ignored for hedge/secret)."""
-    return "\n".join(b for info, b in report.fences if info.startswith("untrusted-quote"))
+def scannable_text(report: Report) -> str:
+    """Report text to scan for secrets: everything EXCEPT untrusted-quote fence bodies.
+
+    Secrets are permitted only inside `untrusted-quote` fences (redacted evidence being
+    reported). Everywhere else — prose AND ordinary code fences — must be scanned, so we
+    strip only untrusted-quote bodies, not all fences.
+    """
+    out, inside_quote = [], False
+    for line in report.raw.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("```"):
+            info = stripped[3:].strip()
+            if not inside_quote and info.startswith("untrusted-quote"):
+                inside_quote = True
+                continue
+            if inside_quote:
+                inside_quote = False
+                continue
+            out.append(line)  # ordinary fence marker; keep body below
+            continue
+        if not inside_quote:
+            out.append(line)
+    return "\n".join(out)
 
 
 def check(report: Report, tier: str, probes_dir: str | None, target: str | None) -> list[str]:
@@ -161,11 +181,12 @@ def check(report: Report, tier: str, probes_dir: str | None, target: str | None)
             if not f.get(field):
                 fails.append(f"[findings] {f['id']} missing field: {field}")
 
-    # Gate 3 — loud-flag: every inference finding must be listed in section 6
-    loud = report.sections.get("6. NEEDS HUMAN/ADVISOR", "")
+    # Gate 3 — loud-flag: every inference finding must be listed in section 6.
+    # Match finding IDs as anchored tokens (F2 must not match inside F20).
+    loud_ids = set(re.findall(r"\bF\d+\b", report.sections.get("6. NEEDS HUMAN/ADVISOR", "")))
     for f in report.findings:
         ver = (f.get("Verification") or "").lower()
-        if "inference" in ver and f["id"] not in loud:
+        if "inference" in ver and f["id"] not in loud_ids:
             fails.append(f"[loud-flag] inference finding {f['id']} absent from section 6 "
                          "(NEEDS HUMAN/ADVISOR)")
 
@@ -180,14 +201,12 @@ def check(report: Report, tier: str, probes_dir: str | None, target: str | None)
                                  "evidence-label")
                     break
 
-    # Gate 5 — secret guard (outside fences)
-    quoted = _fenced_secret_or_hedge_ignored(report)
+    # Gate 5 — secret guard: scan everything except untrusted-quote fence bodies
+    scannable = scannable_text(report)
     for pat in SECRET_PATTERNS:
-        for m in pat.finditer(report.defenced):
-            if m.group(0) not in quoted:
-                fails.append(f"[secret] secret-shaped literal in report body "
-                             f"(pattern {pat.pattern[:24]}...)")
-                break
+        if pat.search(scannable):
+            fails.append(f"[secret] secret-shaped literal outside untrusted-quote "
+                         f"(pattern {pat.pattern[:24]}...)")
 
     # Gate 6 — reference existence + probe linkage
     manifest = set()
@@ -245,8 +264,10 @@ def selftest() -> int:
         "missing_section.md": False,
         "inference_not_flagged.md": False,
         "secret_leak.md": False,
+        "secret_in_fence.md": False,       # secret in an ordinary fence must FAIL
         "vague_finding.md": False,
         "missing_field.md": False,
+        "prefix_collision.md": False,      # F2 vs F20 structural (not substring) match
     }
     ok = True
     for name, should_pass in expect.items():

@@ -6,12 +6,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import re
+import subprocess
 import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "SKILL.md"
 FORBIDDEN_NAMES = {".DS_Store"}
+# Directories excluded from the secret/forbidden scan: .git internals (compressed,
+# not our content) and tests/fixtures (intentional adversarial material the verifier
+# self-test depends on — a real secret literal there is by design).
+SCAN_SKIP_PARTS = {".git", "fixtures"}
 REQUIRED_FILES = (
     "README.md",
     "LICENSE",
@@ -19,6 +24,12 @@ REQUIRED_FILES = (
     "assets/evidence-flightpath.svg",
     "scripts/install.sh",
     "scripts/package.sh",
+    "references/audit-protocol.md",
+    "references/audit-contract.md",
+    "scripts/audit_gate.py",
+    "scripts/probes/census.py",
+    "scripts/probes/git_state.py",
+    "scripts/probes/scan_orchestrate.py",
 )
 SECRET_PATTERNS = (
     re.compile(r"BEGIN [A-Z ]*PRIVATE KEY"),
@@ -64,11 +75,18 @@ def main() -> None:
     if plugin["version"] != entry["version"]:
         fail("plugin and marketplace versions must match")
 
-    for link in re.findall(r"\[[^]]+\]\(([^)]+)\)", skill_text):
-        if not link.startswith(("http://", "https://")) and not (ROOT / link).is_file():
-            fail(f"broken SKILL.md reference: {link}")
+    readme_text = (ROOT / "README.md").read_text(encoding="utf-8")
+    for source_name, source_text in (("SKILL.md", skill_text), ("README.md", readme_text)):
+        for link in re.findall(r"\[[^]]+\]\(([^)]+)\)", source_text):
+            target = link.split("#", 1)[0]
+            if not target or target.startswith(("http://", "https://", "mailto:")):
+                continue
+            if not (ROOT / target).exists():
+                fail(f"broken {source_name} reference: {link}")
 
     for path in ROOT.rglob("*"):
+        if any(part in SCAN_SKIP_PARTS for part in path.parts):
+            continue
         if path.is_file() and path.name in FORBIDDEN_NAMES:
             fail(f"forbidden publish artefact: {path.relative_to(ROOT)}")
         if path.is_file():
@@ -76,7 +94,13 @@ def main() -> None:
             if any(pattern.search(text) for pattern in SECRET_PATTERNS):
                 fail(f"secret-like material found in {path.relative_to(ROOT)}")
 
-    print(f"OK: {name} {plugin['version']}")
+    selftest = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/audit_gate.py"), "--selftest"],
+        capture_output=True, text=True)
+    if selftest.returncode != 0:
+        fail(f"audit_gate self-test failed:\n{selftest.stdout}{selftest.stderr}")
+
+    print(f"OK: {name} {plugin['version']} (gate self-test passed)")
 
 
 if __name__ == "__main__":

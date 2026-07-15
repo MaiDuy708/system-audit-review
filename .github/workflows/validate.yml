@@ -25,5 +25,7 @@ jobs:
           fi
       - name: Check release scripts
         run: bash -n scripts/install.sh scripts/package.sh
-      - name: Validate package
+      - name: Compile-check Python
+        run: python3 -m py_compile scripts/validate.py scripts/audit_gate.py scripts/probes/*.py
+      - name: Validate package (includes gate self-test)
         run: python3 scripts/validate.py

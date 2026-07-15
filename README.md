@@ -39,6 +39,18 @@ flowchart LR
 
 The protocol covers seven evidence layers: file census, change control, runtime/config drift, dependency and test surface, credentials, material side effects, and negative space.
 
+## Operating Model (v0.2)
+
+The skill runs as three tiers with an explicit enforced/advisory split:
+
+- **Brain** — `SKILL.md` + `references/audit-protocol.md`. Advisory prose that teaches the method.
+- **Sensors** — `scripts/probes/`. Read-only scripts that *generate facts* as JSON so evidence is real tool output, not recall.
+- **Gate** — `scripts/audit_gate.py`. Scores the report and exits non-zero if it is structurally incomplete, vague, leaks a secret, cites a probe that never ran, or fails to flag an inference finding for a human.
+
+A portable skill cannot lock an agent's control loop, and this repository does not pretend to. The teeth are the probes' output and the gate's exit code. What the gate cannot judge — whether an inference finding is *substantively* correct — is deliberately pushed into a loud `NEEDS HUMAN/ADVISOR` block.
+
+**Security is extended verify, not a separate cage.** Target content is untrusted DATA, never an instruction; findings carry a trust-provenance axis alongside the evidence-label; probes never execute the target (they read `.git` and code as data, so running the audit cannot be turned into RCE via a hostile `.git/config`); and the recommended posture is a disposable, credential-free, network-denied environment with the target mounted read-only.
+
 ## Native Installation
 
 Use the native command for your agent. No download wrapper is required.
@@ -46,14 +58,14 @@ Use the native command for your agent. No download wrapper is required.
 ### Claude Code
 
 ```bash
-claude plugin marketplace add MaiDuy708/system-audit-review@v0.1.5
+claude plugin marketplace add MaiDuy708/system-audit-review@v0.2.0
 claude plugin install system-audit-review@maiduy-system-audit-review
 ```
 
 ### Codex
 
 ```bash
-codex plugin marketplace add MaiDuy708/system-audit-review --ref v0.1.5
+codex plugin marketplace add MaiDuy708/system-audit-review --ref v0.2.0
 codex plugin add system-audit-review --marketplace maiduy-system-audit-review
 ```
 
@@ -69,7 +81,7 @@ openclaw plugins install system-audit-review --marketplace https://github.com/Ma
 gemini skills install https://github.com/MaiDuy708/system-audit-review.git --path . --scope user --consent
 ```
 
-Claude Code and Codex use immutable `v0.1.5` marketplace refs. OpenClaw and Gemini CLI currently install from the repository default branch because their native plugin/skill commands accept no git ref flag.
+Claude Code and Codex use immutable `v0.2.0` marketplace refs. OpenClaw and Gemini CLI currently install from the repository default branch because their native plugin/skill commands accept no git ref flag.
 
 The optional [installer script](scripts/install.sh) remains for unattended automation and supports a custom source ref through `SYSTEM_AUDIT_REVIEW_REF`.
 
@@ -121,12 +133,16 @@ The skill defaults to read-only. It does not mutate the target, runtime state, c
 ## Repository Layout
 
 ```text
-SKILL.md                         Agent-facing workflow and hard boundaries
-references/audit-protocol.md     Forensic checklist, receipt semantics, and gates
-assets/evidence-flightpath.svg   Self-contained visual overview for the README
+SKILL.md                         Agent-facing workflow and hard boundaries (law)
+references/audit-protocol.md     Method, operating model, and security posture
+references/audit-contract.md     Machine-checkable report + probe-output contract
+scripts/probes/                  Read-only fact-generating probes (census, git_state, scan_orchestrate)
+scripts/audit_gate.py            Deterministic report verifier (treats the report as untrusted)
+scripts/schemas/                 JSON schema for probe output
+tests/fixtures/                  Good + spoofed reports for the gate self-test
 scripts/install.sh               One-command installer for one selected agent
 scripts/package.sh               Reproducible .skill release archive builder
-scripts/validate.py              Dependency-free repository integrity checks
+scripts/validate.py              Dependency-free repository integrity + gate self-test
 .claude-plugin/                  Claude Code plugin and marketplace metadata
 .github/                         CI, dependency updates, ownership, and issue intake
 ```

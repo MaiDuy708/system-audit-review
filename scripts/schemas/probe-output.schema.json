@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "System Audit Review probe output envelope",
+  "type": "object",
+  "required": ["probe", "version", "target", "boundary_enforced", "containment", "coverage_pct", "bounded", "errors", "findings", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "probe": {"type": "string", "minLength": 1},
+    "version": {"type": "string"},
+    "target": {"type": "string"},
+    "boundary_enforced": {"type": "boolean"},
+    "containment": {"enum": ["source-only", "read-only-mount", "disposable-sandbox", "live-observed"]},
+    "coverage_pct": {"type": "number", "minimum": 0, "maximum": 100},
+    "bounded": {"type": "boolean"},
+    "errors": {"type": "array", "items": {"type": "string"}},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "severity", "path", "detail"],
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"type": "string"},
+          "severity": {"enum": ["critical", "high", "medium", "low", "info"]},
+          "path": {"type": "string"},
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "data": {"type": "object"}
+  }
+}

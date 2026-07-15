@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPOSITORY="${SYSTEM_AUDIT_REVIEW_REPOSITORY:-MaiDuy708/system-audit-review}"
-REF="${SYSTEM_AUDIT_REVIEW_REF:-v0.1.5}"
+REF="${SYSTEM_AUDIT_REVIEW_REF:-v0.2.0}"
 SKILL="system-audit-review"
 MARKETPLACE="maiduy-system-audit-review"
 

@@ -41,41 +41,41 @@ The protocol covers seven evidence layers: file census, change control, runtime/
 
 ## Install In One Command
 
-Run the line for the agent you use. The installer changes only that agent's skill directory and prints its actions.
+Run the line for the agent you use. Claude Code, Codex, and OpenClaw use their native plugin marketplaces; Gemini CLI uses its native agent-skill installer.
 
 ### Claude Code
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.3/scripts/install.sh | bash -s -- claude
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh | bash -s -- claude
 ```
 
 ### Codex
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.3/scripts/install.sh | bash -s -- codex
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh | bash -s -- codex
 ```
 
 ### OpenClaw
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.3/scripts/install.sh | bash -s -- openclaw
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh | bash -s -- openclaw
 ```
 
 ### Gemini CLI
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.3/scripts/install.sh | bash -s -- gemini
+curl -fsSL https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh | bash -s -- gemini
 ```
 
 For inspection before execution, download the script first:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.3/scripts/install.sh
+curl -fsSLO https://raw.githubusercontent.com/MaiDuy708/system-audit-review/v0.1.4/scripts/install.sh
 less install.sh
 bash install.sh claude
 ```
 
-The installer defaults to this release tag. Override the source ref when testing a newer branch or a fork:
+The Claude, Codex, and Gemini installers default to this release tag. Override the source ref when testing a newer branch or a fork. OpenClaw's plugin marketplace installer tracks the repository default branch because its current CLI accepts no marketplace ref.
 
 ```bash
 SYSTEM_AUDIT_REVIEW_REF=main bash install.sh claude
@@ -117,9 +117,9 @@ The skill defaults to read-only. It does not mutate the target, runtime state, c
 
 | Agent | Native distribution surface | Verification in this repository |
 |---|---|---|
-| Codex | GitHub skill installer | `quick_validate.py` |
+| Codex | Plugin marketplace | Isolated marketplace add and plugin install |
 | Claude Code | Plugin marketplace | `claude plugin validate` plus isolated install |
-| OpenClaw | Git/local skill install | Isolated managed-skill install and visibility check |
+| OpenClaw | Plugin marketplace bundle | Isolated plugin install and skill visibility check |
 | Gemini CLI | Git/local `.skill` archive | Isolated install and discovery check |
 
 ## Repository Layout

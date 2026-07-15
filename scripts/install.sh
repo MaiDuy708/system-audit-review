@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPOSITORY="${SYSTEM_AUDIT_REVIEW_REPOSITORY:-MaiDuy708/system-audit-review}"
-REF="${SYSTEM_AUDIT_REVIEW_REF:-v0.1.3}"
+REF="${SYSTEM_AUDIT_REVIEW_REF:-v0.1.4}"
 SKILL="system-audit-review"
 MARKETPLACE="maiduy-system-audit-review"
 
@@ -12,7 +12,7 @@ usage() {
 Usage: install.sh <claude|codex|openclaw|gemini>
 
 Environment:
-  SYSTEM_AUDIT_REVIEW_REF=main|tag|branch     Source ref for Claude, Codex, and OpenClaw.
+  SYSTEM_AUDIT_REVIEW_REF=main|tag|branch     Source ref for Claude, Codex, and Gemini.
   SYSTEM_AUDIT_REVIEW_REPOSITORY=owner/repo   Override the GitHub source for a fork.
 EOF
 }
@@ -33,19 +33,14 @@ install_claude() {
 }
 
 install_codex() {
-  need python3
-  local codex_home="${CODEX_HOME:-${HOME}/.codex}"
-  local installer="${codex_home}/skills/.system/skill-installer/scripts/install-skill-from-github.py"
-  if [[ ! -f "${installer}" ]]; then
-    printf 'Codex skill installer not found: %s\n' "${installer}" >&2
-    exit 1
-  fi
-  python3 "${installer}" --repo "${REPOSITORY}" --path . --ref "${REF}" --name "${SKILL}"
+  need codex
+  codex plugin marketplace add "${REPOSITORY}" --ref "${REF}"
+  codex plugin add "${SKILL}" --marketplace "${MARKETPLACE}"
 }
 
 install_openclaw() {
   need openclaw
-  openclaw skills install "git:${REPOSITORY}@${REF}" --global --as "${SKILL}" --force
+  openclaw plugins install "${SKILL}" --marketplace "https://github.com/${REPOSITORY}.git" --force
 }
 
 install_gemini() {

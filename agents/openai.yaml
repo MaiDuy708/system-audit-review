@@ -1,0 +1,4 @@
+interface:
+  display_name: "System Audit Review"
+  short_description: "Forensic, evidence-led audit reviews"
+  default_prompt: "Audit this system with evidence, contract tracing, and verification gates."

@@ -1,0 +1,15 @@
+{
+  "name": "maiduy-system-audit-review",
+  "description": "The MAIDUY distribution channel for System Audit Review.",
+  "owner": {
+    "name": "MaiDuy708"
+  },
+  "plugins": [
+    {
+      "name": "system-audit-review",
+      "source": ".",
+      "description": "Forensic, evidence-led audit reviews",
+      "version": "0.1.0"
+    }
+  ]
+}

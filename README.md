@@ -123,12 +123,14 @@ The skill defaults to read-only. It does not mutate the target, runtime state, c
 
 ## Agent Support
 
-| Agent | Native distribution surface | Verification in this repository |
+| Agent | Native distribution surface | Pre-release install check |
 |---|---|---|
-| Codex | Plugin marketplace | Isolated marketplace add and plugin install |
-| Claude Code | Plugin marketplace | `claude plugin validate` plus isolated install |
-| OpenClaw | Plugin marketplace bundle | Isolated plugin install and skill visibility check |
-| Gemini CLI | Git/local `.skill` archive | Isolated install and discovery check |
+| Codex | Plugin marketplace | Manual marketplace add and plugin install |
+| Claude Code | Plugin marketplace | `claude plugin validate` plus manual install |
+| OpenClaw | Plugin marketplace bundle | Manual plugin install and skill visibility check |
+| Gemini CLI | Git/local `.skill` archive | Manual install and discovery check |
+
+Automated CI (`validate.yml`) enforces the same checks on every push: structural validation, the `audit_gate` self-test, release-script syntax, and a probe compile-check. It does **not** install into any agent — the per-agent install checks above are run manually before a release is tagged.
 
 ## Repository Layout
 
@@ -149,7 +151,7 @@ scripts/validate.py              Dependency-free repository integrity + gate sel
 
 ## Release Policy
 
-Releases are tagged only after structural validation, supported-agent installation checks, and package artifact validation. `0.x` releases are production-usable but may refine workflow shape; `1.0.0` requires independent behavioral evaluation, not only structural validation.
+Releases are tagged only after CI structural validation and the `audit_gate` self-test pass, package artifact validation, and manual supported-agent installation checks. `0.x` releases are production-usable but may refine workflow shape; `1.0.0` requires independent behavioral evaluation, not only structural validation.
 
 ## Contributing, Security, And Brand
 

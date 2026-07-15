@@ -24,4 +24,9 @@ rm -f "${OUT_FILE}"
   zip -X -q -r "${OUT_FILE}" .
 )
 
+(
+  cd "${OUT_DIR}"
+  shasum -a 256 "$(basename "${OUT_FILE}")" > "$(basename "${OUT_FILE}").sha256"
+)
+
 printf '%s\n' "${OUT_FILE}"
